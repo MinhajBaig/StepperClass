@@ -8,15 +8,16 @@ import {
 } from "@mui/material";
 
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth, storage } from "../../config/firebase";
-import { getDownloadURL, ref as sRef, uploadBytes } from 'firebase/storage'
+import { auth, storage, db } from "../../config/firebase";
+import { getDownloadURL, ref as sRef, uploadBytes } from 'firebase/storage';
+import { ref, set } from "firebase/database";
 
 
 
 
 function Form3(props) {
 
-  let [gender, setgender] = useState("male")
+  let [gender, setgender] = useState("")
   let [skill, setskill] = useState()
 
   const handlegender = (e) => {
@@ -26,6 +27,7 @@ function Form3(props) {
 
   const handleupload = (e) => {
     console.log(e.target.files[0]);
+
     const storageref = sRef(storage, `files/${e.target.files[0].name}`)
 
     uploadBytes(storageref, e.target.files[0]).then((snapshot) => {
@@ -59,6 +61,21 @@ function Form3(props) {
       try {
         let user = await createUserWithEmailAndPassword(auth, email, password)
         console.log(user.user.uid)
+
+        let obj = {
+          name,
+          lastname,
+          email,
+          password,
+          education,
+          g_cgp,
+          uid: user.user.uid,
+        };
+
+        let dbref = ref(db,`user/${user.user.uid}`) // ref path
+        await set (dbref,obj)
+        alert("User Added")
+
       }
       catch (e) {
         alert(e)

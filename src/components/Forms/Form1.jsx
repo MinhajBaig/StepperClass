@@ -5,6 +5,8 @@ import Button from '@mui/material/Button';
 
 import { auth } from "../../config/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { db } from "../../config/firebase";
+import { get, ref } from "firebase/database"
 
 
 
@@ -32,25 +34,44 @@ function Form1(props) {
 
 
 
-    const submit = () => {
+    const submit = async () => {
         if (name == "" || lastname == "" || email == "" || password == "") {
-            alert("enter all value")
-
-            // toast.error("Please enter data", {
-            //     position: "top-center",
-            //     theme: "colored",
-            //     autoClose: 1000,
-            //     progress: 0,
-            //     draggable: true,
-            // })
+            alert("Please Enter All Value")
 
         } else {
-            localStorage.setItem("Name", name)
-            localStorage.setItem("LastName", lastname)
-            localStorage.setItem("Email", email)
-            localStorage.setItem("Password", password)
+            let dbref = ref(db, "user")
+            get(dbref)
+                .then((snapshot) => {
+                    console.log(snapshot.val())
+                    let data = Object.values(snapshot.val())
+                    console.log(data)
+                    let check = false
+                    data.map((v, i) => {
+                        if (v.email == email) {
+                            check = true
+                        }
 
-            props.handlechg()
+                    });
+
+
+
+                    if (check == true) {
+                        alert("Already Registered")
+                    }
+                    else {
+                        localStorage.setItem("Name", name)
+                        localStorage.setItem("LastName", lastname)
+                        localStorage.setItem("Email", email)
+                        localStorage.setItem("Password", password)
+
+                        props.handlechg()
+                    }
+
+                })
+                .catch((e) => {
+                    alert(e);
+                });
+
         }
 
     }
